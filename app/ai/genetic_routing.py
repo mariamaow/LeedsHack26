@@ -118,12 +118,12 @@ def genetic_algorithm():
 # -------------------------------
 # Run
 # -------------------------------
+def calculate_best_route():
+    best_route = genetic_algorithm()
 
-best_route = genetic_algorithm()
+    #print("\nBest route (index order):", best_route)
+    #print("Distance (km):", total_distance(best_route))
 
-print("\nBest route (index order):", best_route)
-print("Distance (km):", total_distance(best_route))
-
-print("\nRoute coordinates:")
-for i in best_route:
-    print(cities[i])
+    #print("\nRoute coordinates:")
+    
+    return best_route
