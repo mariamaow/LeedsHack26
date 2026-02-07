@@ -20,14 +20,14 @@ body {
 }
 
 /* Custom Button (Replaces Bootstrap Primary) */
-.btn-custom {
+.btn-custom, .btn-primary {
     background-color: var(--accent);
     color: white;
     border: none;
     transition: all 0.3s ease;
 }
 
-.btn-custom:hover {
+.btn-custom:hover, .btn-primary:hover {
     background-color: #e67700; /* Darker Orange on hover */
     transform: translateY(-2px); /* Slight lift effect */
     color: white;
