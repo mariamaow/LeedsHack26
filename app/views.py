@@ -1,13 +1,13 @@
 import os
 import stripe
-from ai.genetic_routing import calculate_best_route
-from ai.prediction import predict_stock
+from .ai.genetic_routing import calculate_best_route
+from .ai.prediction import predict_stock
 from flask import Flask, flash, render_template, redirect, url_for, session, request, jsonify
 
 from app import app, db, admin, login_manager, mail
 from flask_admin.contrib.sqla import ModelView
 from .models import Volounteer, Donation, FoodBank
-from .forms import SignupForm, LoginForm, DonationForm, FoodBankForm
+from .forms import SignupForm, LoginForm, DonationForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from datetime import timedelta, datetime
@@ -19,40 +19,67 @@ import random
 from cryptography.fernet import Fernet
 from decimal import Decimal
 
-
+login_manager = LoginManager()
+login_manager.login_view = 'login'  # redirect to this route if not logged in
+login_manager.init_app(app)
+@login_manager.user_loader
+def load_user(user_id):
+    if not user_id:
+        return None
+    try:
+        uid = int(user_id)
+    except ValueError:
+        return None
+    # Try FoodBank first
+    user = FoodBank.query.get(uid)
+    if user:
+        return user
+    # Try Volunteer next
+    return Volounteer.query.get(uid)
 
 @app.route('/')
-def index():
-    return render_template('templates/index.html')
+def home():
+    return render_template('home.html')
 
-@app.route('/bank', methods=['POST'])
+@app.route('/bank', methods=['GET', 'POST'])
 @login_required
 def bank():
     threshold = 3
-    foodbanks_with_pending = FoodBank.query.filter(FoodBank.pending_pickups > 0).all()
-    if foodbanks_with_pending> 0:
-        if foodbanks_with_pending > threshold:
-            calculate_best_route()
-        else:
-            return render_template('bank.html', foodbanks=foodbanks_with_pending)
-    else:
-        need_donations, description = predict_stock()
-        return render_template('bank.html', need_donations=need_donations, description=description)
+    foodbank = FoodBank.query.get(current_user.id)
     
-@app.route('/volunteer', methods=['POST'])
+    need_donations, description,requied_last_donation_date = predict_stock()
+    foodbank.requied_last_donation_date = datetime.utcnow() + timedelta(days=requied_last_donation_date)
+    db.session.commit()
+    if int(foodbank.pending_pickups)> 0:
+        if foodbank.pending_pickups > threshold:
+            foodbank = FoodBank.query.get(current_user.id)
+            foodbank.require_donations = True
+            db.session.commit()
+            calculate_best_route()
+            ############################ list insert
+        else:
+            return render_template('bank.html', need_donations=need_donations, description=description, foodbanks_with_pending=foodbank.pending_pickups)
+    else:
+       
+        return render_template('bank.html', need_donations=need_donations, description=description, foodbanks_with_pending=0)
+    
+@app.route('/volunteer', methods=['GET', 'POST'])
 @login_required
 def volunteer():
    
     donations = Donation.query.filter_by(volounteer_id=current_user.volunteer_id).all()
-
-    return render_template('volunteer.html', donations=donations)
+    donation_ids = [d.id for d in donations]
+    return render_template('volunteer.html', donations=donations,donation_ids=donation_ids)
 
 @app.route('/sign-up', methods=['GET', 'POST'])
 def sign_up():
     
     # Redirect authenticated users to home page
     if current_user.is_authenticated:
-        return redirect(url_for('template'))
+        if hasattr(current_user, 'volunteer_id'):
+            return redirect(url_for('volunteer'))
+        else:
+            return redirect(url_for('bank'))
 
     form = SignupForm()
 
@@ -60,12 +87,28 @@ def sign_up():
 
         hash_password =generate_password_hash(form.password.data)
         if form.role.data == 'foodbank':
-            new_user = FoodBank(name=form.username.data, password_hash=hash_password , location=form.location)
+            new_user = FoodBank(name=form.username.data,
+                                latitude= 0.0,
+                                longitude= 0.0,
+                                 password=hash_password ,
+                                location=form.location.data,
+                                pending_pickups=0,
+                                require_donations=False,
+                                required_last_donation_date=datetime.utcnow())
             db.session.add(new_user)
+            db.session.commit()
+            login_user(new_user)
+
             return redirect(url_for('bank')) 
         else:
-            new_user = Volounteer(name=form.username.data, password_hash=hash_password,location=form.location)
+            new_user = Volounteer(name=form.username.data, 
+                                  password=hash_password,
+                                  location=form.location.data,
+                                  latitude= 0.0,
+                                  longitude= 0.0)
             db.session.add(new_user)
+            db.session.commit()
+            login_user(new_user)
             return redirect(url_for('volunteer'))
     return render_template('sign_up.html', form=form)
         
@@ -94,6 +137,38 @@ def login():
         else:
             flash('Invalid username or password', 'danger')
             return redirect(url_for('login'))
-    return render_template('login.html', form=form)
+    return render_template('/login.html', form=form)
 
  
+@app.route('/accept/<donation_id>', methods=['GET', 'POST'])
+@login_required
+def accept(donation_id):
+    donation = Donation.query.get(donation_id)
+    foodbank = FoodBank.query.get(donation.food_bank_id)
+    foodbank.pending_pickups = foodbank.pending_pickups + 1
+    db.session.commit()
+    return redirect(url_for('volunteer'))
+
+@app.route('/decline/<donation_id>', methods=['GET', 'POST'])
+@login_required
+def decline(donation_id):
+    donation = Donation.query.get(donation_id)
+    donation.food_bank_id = None
+    db.session.commit()
+    return redirect(url_for('volunteer'))
+
+@app.route('/request', methods=['GET', 'POST'])
+@login_required
+def request():
+    donations = (
+    db.session.query(Donation)
+    .join(FoodBank, Donation.food_bank_id == FoodBank.id)
+    .filter(Donation.expiry > FoodBank.requied_last_donation_date)
+    .all()
+  )
+    for d in donations:
+        d.food_bank_id = current_user.id
+    foodbank = FoodBank.query.get(current_user.id)
+    foodbank.require_donations = True
+    db.session.commit()
+    return redirect(url_for('bank'))

@@ -136,9 +136,11 @@ def predict_stock():
     # Optional: check if restock is needed
     restock_threshold = 5400
     restock_needed = False
+    requied_last_donation_date = 0
     for i, stock in enumerate(predicted_stock, 1):
         if stock < restock_threshold:
             description += f"\n⚠️ Restock needed by day {i}!"
             restock_needed = True
-    return restock_needed, description
+            requied_last_donation_date += 1
+    return restock_needed, description,requied_last_donation_date
         

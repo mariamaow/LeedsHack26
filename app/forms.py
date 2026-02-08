@@ -12,8 +12,8 @@ class SignupForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = StringField('Password', widget=PasswordInput(hide_value=False), validators=[DataRequired(), Length(min=8, message="Stronger password required, must be a length of at least 8")])
     location = StringField('Location', validators=[DataRequired()])
-    confirm_password = StringField('ConfirmPassword', widget=PasswordInput(hide_value=False), validators=[DataRequired()])
-    role = RadioField(
+   
+    role = SelectField(
         'Sign up as:',
         choices=[('foodbank', 'Foodbank'), ('volunteer', 'Volunteer')],
         validators=[DataRequired()]

@@ -19,7 +19,7 @@
         <div class="container">
             <a class="navbar-brand" href="login_signup.html">
                 <!-- This creates button object which I have set to the logo and will take to home page-->
-                <img src="logo.png.png" alt="us2banks Logo" height="55"> 
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="us2banks Logo" height="55"> 
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
@@ -36,9 +36,24 @@
     </nav>
 
     <div class="container">
-        <h2 class="fw-bold mb-4">Open Requests</h2>
-        <div id="taskList">
+        <div class="container my-5">
+            {%for d in donations%}
+            <div class="mb-3 p-4 bg-light rounded shadow text-center">
+                <h3>Meal Amount: {{d.meal_amount}}</h3>
+                <p>Expiry: {{d.expiry}}</p>
+                {%if d.food_bank_id%}
+                <a href="{{ url_for('accept', donation_id=d.id) }}" 
+                class="btn btn-sm btn-outline-primary">Accept</a>
+                </td>
+                <a href="{{ url_for('decline',donation_id=d.id') }}" 
+                class="btn btn-sm btn-outline-primary">Decline</a>
+                </td>
+                {%else%}
+                <p>This meal is yet to be chosen for pickup.</p>
+                {%endif%}
             </div>
+            {%endfor%}
+        </div>
     </div>
 
     <script>

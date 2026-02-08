@@ -33,4 +33,4 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
 
-from app import views, models
+from app import views, models,ai
