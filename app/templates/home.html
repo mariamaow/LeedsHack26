@@ -32,17 +32,36 @@
                 </ul>
             </div>
         </div>
-        <a href="{{ url_for('logout') }}" 
-        class="btn btn-sm btn-outline-primary">Logout</a>
     </nav>
 
-    <main class="container my-5 flex-grow-1">
+<main class="container my-5 flex-grow-1">
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <!-- Template for center content to be editted for every page-->
                 <div class="card shadow-sm border-0 p-4">
                     <h2 class="mb-3 fw-bold text-center" style="color:#e67700;">Home</h2>
-                    <p class="text-muted mb-4">Welcome to us2foods, we connect volunteers wishing to donate fresh, edible but waste meals to foodbanks in need. As a food bank you can sign up and enter your needs, you can then upload your requests and volunteers can choose to accept and send over their food.</p>
+                    <p class="text-muted mb-4">Welcome to us2foods, we connect volunteers wishing to donate fresh, edible but waste meals to foodbanks in need. We have noticed a large difficulty in bringing waste food from restaurants or from individual volunteers to the food banks, we want to help connect food banks to local sources of waste, edible food which can be used to feed the needy. We use a machine learning model to predict times when food banks will run out of food and foodbanks can then send out requests for food.</p>
+
+                    <div class="row row-cols-1 row-cols-md-2 g-4">
+                        <div class="col">
+                            <div class="card mb-3 h-100" style="border-color:#4E9F3D;">
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold" style="color:#4E9F3D">Food-Bank Review</h5>
+                                    <h6 class="card-subtitle mb-2" style="color:#e67700">Leeds North and West Food Bank</h6>
+                                    <p class="card-text">"us2banks has been incredible in helping us source more food to be able to supply to our community in need, the experience has been great, the website is very easy to use and I highly recommend any food bank join and use this organisation."</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card mb-3 h-100" style="border-color:#4E9F3D;">
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold" style="color:#4E9F3D">Volunteer Review</h5>
+                                    <h6 class="card-subtitle mb-2" style="color:#e67700">Pret-A-Manger</h6>
+                                    <p class="card-text">"us2banks has been fantastic in helping us reduce our food waste and sending any spare food at the end of the day to food banks and people in need. Their website is very simple and intuitive, the features are incredible and they are extremely helpful and friendly."</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <p class="text-center fw-bold" style="color:#4E9F3D;">Choose to Log in or Sign up</p>
                     <!--<div class="mb-3">
                         <label for="userInput" class="form-label fw-semibold">Choose to login or signup</label>

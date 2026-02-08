@@ -19,15 +19,20 @@ body {
     font-size: 1.5rem;
 }
 
+/* Hyperlink Text (Logo) */
+.card-link {
+    color: var(--primary) !important /* !important basically forces this colour over bootstrap choice*/;
+}
+
 /* Custom Button (Replaces Bootstrap Primary) */
-.btn-custom {
+.btn-custom, .btn-primary {
     background-color: var(--accent);
     color: white;
     border: none;
     transition: all 0.3s ease;
 }
-
-.btn-custom:hover {
+/* Custom button hover colour*/
+.btn-custom:hover, .btn-primary:hover {
     background-color: #e67700; /* Darker Orange on hover */
     transform: translateY(-2px); /* Slight lift effect */
     color: white;
@@ -37,4 +42,14 @@ body {
 .form-control:focus {
     border-color: var(--primary);
     box-shadow: 0 0 0 0.25rem rgba(78, 159, 61, 0.25); /* Green Glow */
+}
+
+.task-hover {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: white; /* Ensures the card is white against the cream background */
+}
+
+.task-hover:hover {
+    transform: translateY(-3px); /* Lifts up slightly */
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important; /* Stronger shadow */
 }
