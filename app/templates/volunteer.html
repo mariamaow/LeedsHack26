@@ -24,6 +24,8 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
             </button>
+            <a href="{{ url_for('logout') }}" 
+            class="btn btn-sm btn-outline-primary">Logout</a>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <!-- This allows me to add the buttons using bootstrap commands to align them -->
@@ -36,6 +38,9 @@
     </nav>
 
     <div class="container">
+        <a href="{{ url_for('new_donation') }}" 
+                class="btn btn-sm btn-outline-primary">Add New Donation</a>
+                </td>
         <div class="container my-5">
             {%for d in donations%}
             <div class="mb-3 p-4 bg-light rounded shadow text-center">
@@ -45,7 +50,7 @@
                 <a href="{{ url_for('accept', donation_id=d.id) }}" 
                 class="btn btn-sm btn-outline-primary">Accept</a>
                 </td>
-                <a href="{{ url_for('decline',donation_id=d.id') }}" 
+                <a href="{{ url_for('decline',donation_id=d.id) }}" 
                 class="btn btn-sm btn-outline-primary">Decline</a>
                 </td>
                 {%else%}

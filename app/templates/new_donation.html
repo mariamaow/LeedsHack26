@@ -27,34 +27,53 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <!-- This allows me to add the buttons using bootstrap commands to align them -->
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}" style="color:#4E9F3D">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">Home</a></li>
                     <!-- Example, px here would add space between border of button and text inside button so its not squished-->
                 </ul>
             </div>
         </div>
-        <a href="{{ url_for('logout') }}" 
-        class="btn btn-sm btn-outline-primary">Logout</a>
     </nav>
-
+    
     <main class="container my-5 flex-grow-1">
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <!-- Template for center content to be editted for every page-->
                 <div class="card shadow-sm border-0 p-4">
-                    <h2 class="mb-3 fw-bold text-center" style="color:#e67700;">Home</h2>
-                    <p class="text-muted mb-4">Welcome to us2foods, we connect volunteers wishing to donate fresh, edible but waste meals to foodbanks in need. As a food bank you can sign up and enter your needs, you can then upload your requests and volunteers can choose to accept and send over their food.</p>
-                    <p class="text-center fw-bold" style="color:#4E9F3D;">Choose to Log in or Sign up</p>
+                    <h2 class="mb-3 fw-bold text-center" style="color:#e67700;">Add New Meal</h2>
+                    <p class="text-muted mb-4"></p>
+                    
                     <!--<div class="mb-3">
                         <label for="userInput" class="form-label fw-semibold">Choose to login or signup</label>
                         <input type="text" class="form-control form-control-lg" id="userInput" placeholder="Type something here...">
                     </div> -->
-                    <a class="btn btn-custom btn-lg mt-2 w-100 fw-bold" href="{{ url_for('sign_up') }}" role="button">Sign Up</a>
-                    <a class="btn btn-custom btn-lg mt-2 w-100 fw-bold" href="{{ url_for('login') }}" role="button">Login</a>
-
+                    <!--<a class="btn btn-custom btn-lg mt-2 w-100 fw-bold" href="Sign Up.html" role="button">Sign Up</a>
+                    --> 
                     
-                    <div id="feedback" class="mt-3 text-center text-success fw-bold" style="display: none;">
-                        </div>
+                    <form method="POST" >
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            
+                                
+                                <p class=" fw-bold" style="color:#4E9F3D;">Meal Amount</p>
+                                   
+                                <div class="form-floating">
+                                    {{ form.meal_amount(class="form-control", id="meal_amount", placeholder="Enter your meal_amount", autocomplete="off") }}
+                                    <label for="meal_amount">{{ form.meal_amount.label }} <span class="text-danger">*</span></label>
+                                </div>
+                                <div class="form-floating">
+                                    {{ form.expiry(class="form-control", id="expiry", placeholder="Enter your expiry", autocomplete="off") }}
+                                    <label for="expiry">{{ form.expiry.label }} <span class="text-danger">*</span></label>
+                                </div>
+                             
+                                
 
+                   
+                        <div class="col-12 mt-3 d-flex justify-content-center">
+                            <button type="submit" class="btn bg-warning btn-lg rounded-3 px-5">Add</button>
+                        </div>
+                    </form>
+                    </div>
+                    
                 </div>
 
             </div>
