@@ -15,7 +15,7 @@ from sqlalchemy import func, or_
 import json
 import math
 import uuid
-import random
+import random       
 from cryptography.fernet import Fernet
 from decimal import Decimal
 
@@ -42,32 +42,24 @@ def home():
     return render_template('home.html')
 
 @app.route('/bank', methods=['GET', 'POST'])
-@login_required
+
 def bank():
     threshold = 3
     foodbank = FoodBank.query.get(current_user.id)
     
     need_donations, description,requied_last_donation_date = predict_stock()
-    foodbank.requied_last_donation_date = datetime.utcnow() + timedelta(days=requied_last_donation_date)
-    db.session.commit()
-    if int(foodbank.pending_pickups)> 0:
-        if foodbank.pending_pickups > threshold:
-            foodbank = FoodBank.query.get(current_user.id)
-            foodbank.require_donations = True
-            db.session.commit()
-            calculate_best_route()
-            ############################ list insert
-        else:
-            return render_template('bank.html', need_donations=need_donations, description=description, foodbanks_with_pending=foodbank.pending_pickups)
-    else:
-       
-        return render_template('bank.html', need_donations=need_donations, description=description, foodbanks_with_pending=0)
-    
+    foodbank.requied_last_donation_date = datetime.utcnow() + timedelta(days =3)
+  
+    best_route = calculate_best_route()
+          
+     
+    return render_template('bank.html', need_donations=need_donations, description=description, foodbanks_with_pending=foodbank.pending_pickups, best_route=best_route)
+
 @app.route('/volunteer', methods=['GET', 'POST'])
-@login_required
+
 def volunteer():
    
-    donations = Donation.query.filter_by(volounteer_id=current_user.volunteer_id).all()
+    donations = Donation.query.filter_by(volounteer_id=current_user.id).all()
     donation_ids = [d.id for d in donations]
     return render_template('volunteer.html', donations=donations,donation_ids=donation_ids)
 
@@ -93,8 +85,7 @@ def sign_up():
                                  password=hash_password ,
                                 location=form.location.data,
                                 pending_pickups=0,
-                                require_donations=False,
-                                required_last_donation_date=datetime.utcnow())
+                                require_donations=False)
             db.session.add(new_user)
             db.session.commit()
             login_user(new_user)
@@ -110,7 +101,7 @@ def sign_up():
             db.session.commit()
             login_user(new_user)
             return redirect(url_for('volunteer'))
-    return render_template('sign_up.html', form=form)
+    return render_template('signup.html', form=form)
         
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -141,7 +132,7 @@ def login():
 
  
 @app.route('/accept/<donation_id>', methods=['GET', 'POST'])
-@login_required
+
 def accept(donation_id):
     donation = Donation.query.get(donation_id)
     foodbank = FoodBank.query.get(donation.food_bank_id)
@@ -150,7 +141,7 @@ def accept(donation_id):
     return redirect(url_for('volunteer'))
 
 @app.route('/decline/<donation_id>', methods=['GET', 'POST'])
-@login_required
+
 def decline(donation_id):
     donation = Donation.query.get(donation_id)
     donation.food_bank_id = None
@@ -158,7 +149,7 @@ def decline(donation_id):
     return redirect(url_for('volunteer'))
 
 @app.route('/request', methods=['GET', 'POST'])
-@login_required
+
 def request():
     donations = (
     db.session.query(Donation)
@@ -172,3 +163,26 @@ def request():
     foodbank.require_donations = True
     db.session.commit()
     return redirect(url_for('bank'))
+
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
+
+
+@app.route('/new_donation', methods=['GET', 'POST'])
+
+def new_donation():
+    form = DonationForm()
+    if form.validate_on_submit():
+        new_donation = Donation(
+            meal_amount=form.meal_amount.data,
+            expiry=form.expiry.data,
+            volounteer_id=current_user.id,
+            food_bank_id=None
+        )
+        db.session.add(new_donation)
+        db.session.commit()
+        flash('Donation created successfully!', 'success')
+        return redirect(url_for('volunteer'))
+    return render_template('new_donation.html', form=form)
