@@ -79,61 +79,68 @@ def create_dataset():
     print("food_bank_data.csv with realistic patterns generated successfully!")
     print(data.head(10))
 
-# ------------------------------
-# 1. Load your historical data
-# Example CSV structure:
-# date,stock_level,donations_received,volunteers_available
-# ------------------------------
-create_dataset()
+def predict_stock():
+    # ------------------------------
+    # 1. Load your historical data
+    # Example CSV structure:
+    # date,stock_level,donations_received,volunteers_available
+    # ------------------------------
+    create_dataset()
 
-# ------------------------------
-# 1. Load data
-# ------------------------------
-data = pd.read_csv('food_bank_data.csv', parse_dates=['date'])
+    # ------------------------------
+    # 1. Load data
+    # ------------------------------
+    data = pd.read_csv('food_bank_data.csv', parse_dates=['date'])
 
-# 2. Prepare features and target
-# We'll predict next day's stock
-data['next_stock'] = data['stock_level'].shift(-1)
-data = data.dropna()
+    # 2. Prepare features and target
+    # We'll predict next day's stock
+    data['next_stock'] = data['stock_level'].shift(-1)
+    data = data.dropna()
 
-X = data[['stock_level', 'donations_received', 'volunteers_available']]  # features
-y = data['next_stock']  # target
+    X = data[['stock_level', 'donations_received', 'volunteers_available']]  # features
+    y = data['next_stock']  # target
 
-# 3. Split into train/test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # 3. Split into train/test sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# 4. Train the model
-model = LinearRegression()
-model.fit(X_train, y_train)
+    # 4. Train the model
+    model = LinearRegression()
+    model.fit(X_train, y_train)
 
-# 5. Make predictions
-y_pred = model.predict(X_test)
+    # 5. Make predictions
+    y_pred = model.predict(X_test)
 
 
 
-# Get latest data
-latest = data.iloc[-1][['stock_level', 'donations_received', 'volunteers_available']].values
+    # Get latest data
+    latest = data.iloc[-1][['stock_level', 'donations_received', 'volunteers_available']].values
 
-# Use average historical donations and volunteers for future prediction
-avg_donations = data['donations_received'].mean()
-avg_volunteers = data['volunteers_available'].mean()
+    # Use average historical donations and volunteers for future prediction
+    avg_donations = data['donations_received'].mean()
+    avg_volunteers = data['volunteers_available'].mean()
 
-predicted_stock = []
+    predicted_stock = []
 
-current_stock = latest[0]
-for day in range(7):
-    # Prepare input: [stock_level, donations, volunteers]
-    X_future = np.array([[current_stock, avg_donations, avg_volunteers]])
-    next_stock = model.predict(X_future)[0]
-    predicted_stock.append(next_stock)
-    current_stock = next_stock  # update stock for next day
+    current_stock = latest[0]
+    for day in range(7):
+        # Prepare input: [stock_level, donations, volunteers]
+        X_future = np.array([[current_stock, avg_donations, avg_volunteers]])
+        next_stock = model.predict(X_future)[0]
+        predicted_stock.append(next_stock)
+        current_stock = next_stock  # update stock for next day
 
-print("Predicted stock for the next 7 days:")
-for i, stock in enumerate(predicted_stock, 1):
-    print(f"Day {i}: {stock:.0f}")
+    description = f"Predicted stock for the next 7 days:"
+    for i, stock in enumerate(predicted_stock, 1):
+        description += f"\nDay {i}: {stock:.0f}"
 
-# Optional: check if restock is needed
-restock_threshold = 5400
-for i, stock in enumerate(predicted_stock, 1):
-    if stock < restock_threshold:
-        print(f"⚠️ Restock needed by day {i}!")
+    # Optional: check if restock is needed
+    restock_threshold = 5400
+    restock_needed = False
+    requied_last_donation_date = 0
+    for i, stock in enumerate(predicted_stock, 1):
+        if stock < restock_threshold:
+            description += f"\n⚠️ Restock needed by day {i}!"
+            restock_needed = True
+            requied_last_donation_date += 1
+    return restock_needed, description,requied_last_donation_date
+        

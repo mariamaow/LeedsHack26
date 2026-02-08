@@ -5,7 +5,10 @@ from flask_login import UserMixin
 class Volounteer(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-
+    password = db.Column(db.String(200), nullable=False)
+    location = db.Column(db.String(200), nullable=False)
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
     def __repr__(self):
         return f'<Volounteer {self.name}>'
 
@@ -20,12 +23,16 @@ class Donation(db.Model):
     def __repr__(self):
         return f'<Donation {self.amount} by Volounteer ID {self.volounteer_id}>'
     
-class FoodBank(db.Model):
+class FoodBank(UserMixin,db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
+    password = db.Column(db.String(200), nullable=False)
     location = db.Column(db.String(200), nullable=False)
-    space_available = db.Column(db.Integer, nullable=True)
     pending_pickups = db.Column(db.Integer, nullable=True)
+    require_donations = db.Column(db.Boolean, default=True)
+    requied_last_donation_date = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return f'<FoodBank {self.name}>'
